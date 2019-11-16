@@ -21,14 +21,12 @@
   "keywords": [
     "typescript",
     "ts",
-    "path",
-    "content-type",
-    "https",
-    "http",
-    "mime",
-    "file handling",
-    "Rest",
-    "RestFul"
+    "parsing",
+    "json",
+    "validation",
+    "dsl",
+    "domain specific language",
+    "edsl"
   ],
   "author": {
     "name": "Alex T",
