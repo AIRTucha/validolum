@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import { Success, Failure } from 'amonad'
-import { maybeValidate, num, str, bool } from '../src/index'
+import { maybeValidate, num, str, bool, tryToValidate } from '../src/index'
 
-describe("maybe", () => {
+describe("maybeValidate", () => {
   describe("Correct", () => {
     it("Single property", () => {
       expect(
@@ -84,5 +84,30 @@ describe("maybe", () => {
         Failure("Key value1 is not validated due to: Key value2 is not validated due to: Value is not boolean")
       )
     })
+  })
+})
+
+
+describe("tryToValidate", () => {
+  it("parse value", () => {
+    expect(
+      tryToValidate({
+        value: num
+      })({
+        value: 2
+      })
+    ).eql(
+      { value: 2 }
+    )
+  })
+
+  it("throws correct error", () => {
+    expect(
+      () => tryToValidate({
+        value: str
+      })({
+        value: 2
+      })
+    ).throw(Error, "Key value is not validated due to: Value is not string")
   })
 })

@@ -39,14 +39,17 @@ export const maybeValidate = <T extends Value>(parser: Schema<T>) => (value: any
     Object
       .keys(parser)
       .reduce(
-        (obj, key) =>
+        (obj, key) => {
           obj[key] = parser[key](value[key])
             .bind(
               undefined,
               errMsg => `Key ${key} is not validated due to: ${errMsg}`
             )
-            .getOrThrow(),
-        {} as any) as T
+            .getOrThrow()
+          return obj
+        },
+        {} as any
+      ) as T
   )
 
 export const tryToValidate = <T extends Value>(parser: Schema<T>) => (value: any) =>
