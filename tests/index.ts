@@ -141,22 +141,28 @@ describe("maybeValidate", () => {
 describe("tryToValidate", () => {
   it("parse value", () => {
     equal(
-      verify<{ value: number }, any>({
-        value: num
-      })({
-        value: 2
-      }),
+      verify<{ value: number }, any>(
+        {
+          value: num
+        },
+        {
+          value: 2
+        }
+      ),
       { value: 2 }
     )
   })
 
   it("throws correct error", () => {
     expect(
-      () => verify<{ value: string }, any>({
-        value: str
-      })({
-        value: 2
-      })
+      () => verify<{ value: string }, any>(
+        {
+          value: str
+        },
+        {
+          value: 2
+        }
+      )
     ).throw(Error, "Key value is not validated due to: Value is not string")
   })
 })

@@ -89,13 +89,18 @@ export const obj = (value?: object): Result<object, string> => typeof value === 
   :
   Failure("Value is not obj")
 
-/**
- * @param parser Object which describes the way properties has to be parsed or verified
- * @returns Success of the object if satisfied schema or Failure with description of the error
- */
-export const maybeVerify = <O extends Value, I extends Value = Possible<O>>(parser: Schema<I, O>) => {
+export function maybeVerify<O extends Value, I extends Value = Possible<O>>(
+  parser: Schema<I, O>,
+  value: I
+): Result<Intersection<O, I>, string>
+
+export function maybeVerify<O extends Value, I extends Value = Possible<O>>(
+  parser: Schema<I, O>
+): (value?: I) => Result<Intersection<O, I>, string>
+
+export function maybeVerify<O extends Value, I extends Value = Possible<O>>(parser: Schema<I, O>, value?: I) {
   const keys = Object.keys(parser)
-  return (value?: I): Result<Intersection<O, I>, string> =>
+  const body = (value?: I): Result<Intersection<O, I>, string> =>
     value ?
       Result(() =>
         keys
@@ -114,14 +119,15 @@ export const maybeVerify = <O extends Value, I extends Value = Possible<O>>(pars
       )
       :
       Failure("Object is undefined")
+  return value ? body(value) : body
 }
 
 /**
  * @param parser Object which describes the way properties has to be parsed or verified
  * @returns The product of parsing. It might throw an exception if parsing was to successful
  */
-export const verify = <O extends Value, I extends Value = Possible<O>>(parser: Schema<I, O>) => (value?: I) =>
-  maybeVerify(parser)(value)
+export const verify = <O extends Value, I extends Value = Possible<O>>(parser: Schema<I, O>, value: I) =>
+  maybeVerify(parser, value)
     .bind(
       undefined,
       errMsg => new Error(errMsg)
