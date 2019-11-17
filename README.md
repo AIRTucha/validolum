@@ -170,7 +170,91 @@ const verificationResult = verify(
 
 ## API
 
-WIP
+The package consist of two parts: verification functions and functions which can be used as part of schema.
+
+### verify()
+
+Basic verify function expects two arguments: 
+
+  * The first argument is an object which describes structure of expected values. The object has similar properties, but actual values are replaced with a functions responsible for their validation or even parsing.
+  * The second value is an object which expect to be verified or parsed.
+
+It also accepts two type arguments, the first one represents and output type, while an input is meant for input type. By default an input type is defined based on an output type as an object with the properties of the same kind by with possibility to be nullable. Input an output types are also reflected in types of parsing function accepted by schema. Schema as well as the output value contain only properties which appears to be in both of provided type arguments.
+
+Expected result of the execution is a parsed and correctly types object, otherwise the function will throw an exception with detaisled explanation of the mistake.
+
+```typescript
+export function verify<O extends Value, I extends Value = Possible<O>>(
+  parser: Schema<I, O>, 
+  value: I
+): Intersection<O, I>
+```
+
+### maybeVerify()
+
+It is a special version of *verify* function modified for handling an errors in monadic way. The function are similar on all other ways.
+
+```typescript
+export function maybeVerify<O extends Value, I extends Value = Possible<O>>(
+  parser: Schema<I, O>,
+  value: I
+): Result<Intersection<O, I>, string>
+```
+
+Curred version of *maybeVerify* can be used for cached of the schema or for creation of custom parsing function for schema with nested objects.
+
+```typescript
+export function maybeVerify<O extends Value, I extends Value = Possible<O>>(
+  parser: Schema<I, O>
+): (value?: I) => Result<Intersection<O, I>, string>
+```
+
+### Parsing and verification functions
+
+Following function can be used as part of parsing schema.
+
+#### numeric
+
+There are three function for parsing of numeric values. *num* function is mainly used for verification of values which expected to be numeric. It is meant for verification that numeric property is defined and that it is indeed number.
+
+```typescript
+export const num = (value?: number): Result<number, string>
+```
+
+*float* function is more targeted on extraction of floating numbers out of strings.
+
+```typescript
+export const float = (value: string): Result<number, string>
+```
+
+*int* does the same thing, but only for integer.
+```typescript
+export const int = (value: string): Result<number, string> 
+```
+
+#### strings
+
+Strings is the most common type of raw data. *str* function can verify that the value is really string and that it is defined.
+
+```typescript
+export const str = (value?: string): Result<string, string> 
+```
+
+#### boolean
+
+There is no build-in way to parse boolean. Therefore function is capable to validate if provided value is boolean or string with correspondent value. Strings are going to be converted accordingly.
+
+```typescript
+export const bool = (value?: boolean | string): Result<boolean, string>
+```
+
+#### object
+
+Object can be detected by *obj* function. Unfortunately, the function can not provide any other additional information except the fact that the value is an object of unknown shape.
+
+```typescript
+export const obj = (value?: object): Result<object, string>
+```
 
 ## Contribution guidelines
 
