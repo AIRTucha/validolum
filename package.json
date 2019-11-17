@@ -1,6 +1,6 @@
 {
   "name": "validolum",
-  "version": "0.0.9",
+  "version": "1.0.0",
   "description": "Utility for parsing of JavaScript objects",
   "main": "./dist/index.js",
   "scripts": {
@@ -26,7 +26,8 @@
     "validation",
     "dsl",
     "domain specific language",
-    "edsl"
+    "edsl",
+    "schema"
   ],
   "author": {
     "name": "Alex T",

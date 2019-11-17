@@ -1,56 +1,129 @@
 import { Result, Success, Failure } from "amonad"
 
-type Keys = string
-
+/**
+ * Definition for an arbitrary object
+ */
 type Value = {
-  [P in Keys]: any
+  [P in keyof any]: any
 }
 
-export type Potential<T> = {
-  [P in keyof T]: any
+/**
+ * Validation schema
+ */
+type Schema<I, O = I> = {
+  [P in (keyof I & keyof O)]: (value: I[P]) => Result<O[P], string>
 }
 
-type Schema<T> = {
-  [P in keyof T]: (value: any) => Result<T[P], string>
+/**
+ * Represent an object which might be partially defined, so that some of its types are not available
+ * The main difference with Partial is the fact that it is also applicable to nested objects.
+ */
+type Possible<T> = {
+  [P in keyof T]?: Possible<T[P]>
 }
 
-export const num = (value: any): Result<number, string> => typeof value === "number" ?
+/**
+ * Represents an object which has only properties which exists in both of provided types
+ */
+type Intersection<O, I> = {
+  [P in (keyof O & keyof I)]: O[P]
+}
+
+/**
+ * @param value Potential number
+ * @returns Success of number or Failure which contains description of the error
+ */
+export const num = (value?: number): Result<number, string> => typeof value === "number" ?
   Success(value)
   :
   Failure("Value is not number")
 
-export const str = (value: any): Result<string, string> => typeof value === "string" ?
+/**
+ * @param value String potentially containing floating number
+ * @returns Success of float or Failure which contains description of the error
+ */
+export const float = (value: string): Result<number, string> => {
+  const result = Number.parseFloat(value)
+  return Number.isNaN(result) ? Failure("Value is not float") : Success(result)
+}
+
+/**
+ * @param value String potentially containing integer number
+ * @returns Success of integer or Failure which contains description of the error
+ */
+export const int = (value: string): Result<number, string> => {
+  const result = Number.parseInt(value)
+  return Number.isNaN(result) ? Failure("Value is not integer") : Success(result)
+}
+
+/**
+ * @param value Potential string
+ * @returns Success of string or Failure which contains description of the error
+ */
+export const str = (value?: string): Result<string, string> => typeof value === "string" ?
   Success(value)
   :
   Failure("Value is not string")
 
-export const bool = (value: any): Result<boolean, string> => typeof value === "boolean" ?
+/**
+ * @param value Potential boolean or string potentially containing floating number
+ * @returns Success of boolean or Failure which contains description of the error
+ */
+export const bool = (value?: boolean | string): Result<boolean, string> => typeof value === "boolean" ?
   Success(value)
   :
-  Failure("Value is not boolean")
+  value === "true" ?
+    Success(true)
+    :
+    value === "false" ?
+      Success(false)
+      :
+      Failure("Value is not boolean")
 
-export const obj = (value: any): Result<object, string> => typeof value === "object" ?
+/**
+ * @param value Potential object
+ * @returns Success of object or Failure which contains description of the error
+ */
+export const obj = (value?: object): Result<object, string> => typeof value === "object" ?
   Success(value)
   :
   Failure("Value is not obj")
 
-export const maybeValidate = <T extends Value>(parser: Schema<T>) => (value: any) =>
-  Result<T, string>(() =>
-    Object
-      .keys(parser)
-      .reduce(
-        (obj, key) => {
-          obj[key] = parser[key](value[key])
-            .bind(
-              undefined,
-              errMsg => `Key ${key} is not validated due to: ${errMsg}`
-            )
-            .getOrThrow()
-          return obj
-        },
-        {} as any
-      ) as T
-  )
+/**
+ * @param parser Object which describes the way properties has to be parsed or verified
+ * @returns Success of the object if satisfied schema or Failure with description of the error
+ */
+export const maybeVerify = <O extends Value, I extends Value = Possible<O>>(parser: Schema<I, O>) => {
+  const keys = Object.keys(parser)
+  return (value?: I): Result<Intersection<O, I>, string> =>
+    value ?
+      Result(() =>
+        keys
+          .reduce(
+            (obj, key) => {
+              obj[key] = parser[key](value[key])
+                .bind(
+                  undefined,
+                  errMsg => `Key ${key} is not validated due to: ${errMsg}`
+                )
+                .getOrThrow()
+              return obj
+            },
+            {} as any
+          )
+      )
+      :
+      Failure("Object is undefined")
+}
 
-export const tryToValidate = <T extends Value>(parser: Schema<T>) => (value: any) =>
-  maybeValidate(parser)(value).bind(undefined, errMsg => new Error(errMsg)).getOrThrow()
+/**
+ * @param parser Object which describes the way properties has to be parsed or verified
+ * @returns The product of parsing. It might throw an exception if parsing was to successful
+ */
+export const verify = <O extends Value, I extends Value = Possible<O>>(parser: Schema<I, O>) => (value?: I) =>
+  maybeVerify(parser)(value)
+    .bind(
+      undefined,
+      errMsg => new Error(errMsg)
+    )
+    .getOrThrow()
