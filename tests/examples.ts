@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { Success, Failure, Result } from 'amonad'
 import { maybeVerify, num, str, bool, verify, float, int, obj } from '../src/index'
-import { stringify } from 'querystring'
 
 const equal = <T>(v1: T, v2: T) => expect(v1).eql(v2)
 
@@ -19,11 +18,28 @@ describe("examples", () => {
         value: 2
       }
     )
+    // verificationResult is { value: 2 }
 
     equal(
       verificationResult,
       { value: 2 }
     )
+  })
+
+  it("Simple validation", () => {
+    expect(() => {
+      const verificationResult = verify<{ value: number }>(
+        {
+          value: num
+        },
+        {
+        }
+      )
+      // Should throw an Error with explanation of problem like:
+      // "Key value is not validated due to: Value is not number"
+    }).throw(Error, "Key value is not validated due to: Value is not number")
+
+
   })
 
   it("Simple parsing", () => {
@@ -35,6 +51,7 @@ describe("examples", () => {
         value: "3.1415"
       }
     )
+    // verificationResult is { value: 3.1415 }
 
     equal(
       verificationResult,
@@ -51,6 +68,7 @@ describe("examples", () => {
         value: 2
       }
     )
+    // verificationResult Success({ value: 2 })
 
     equal(
       verificationResult,
@@ -59,12 +77,14 @@ describe("examples", () => {
   })
 
   it("Curred Monadic API", () => {
-    const verificationResult = maybeVerify<{ value: number }>(
+    const myVerify = maybeVerify<{ value: number }>(
       {
         value: num
-      })({
-        value: 2
       })
+    const verificationResult = myVerify({
+      value: 2
+    })
+    // verificationResult is Success({ value: 2 })
 
     equal(
       verificationResult,
@@ -87,6 +107,7 @@ describe("examples", () => {
         valueNested: { value: true }
       }
     )
+    // verificationResult is { valueNested: { value: true } }
 
     equal(
       verificationResult,
@@ -145,6 +166,15 @@ describe("examples", () => {
         customField: {},
       }
     )
+    // verificationResult is {
+    //   name: "Sherlock",
+    //   address: {
+    //     street: "Baker",
+    //     houseNumber: 221,
+    //     city: "London"
+    //   },
+    //   customField: {},
+    // }
 
     equal(
       verificationResult,
