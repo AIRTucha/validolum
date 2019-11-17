@@ -89,11 +89,22 @@ export const obj = (value?: object): Result<object, string> => typeof value === 
   :
   Failure("Value is not obj")
 
+/**
+ * @param parser Object which describes the way properties has to be parsed or verified
+ * @param value Value for parsing and verification
+ * @returns Successfully parsed object or Failure with description of parsing error
+ */
 export function maybeVerify<O extends Value, I extends Value = Possible<O>>(
   parser: Schema<I, O>,
   value: I
 ): Result<Intersection<O, I>, string>
 
+/**
+ * @param parser Object which describes the way properties has to be parsed or verified
+ * @curring
+ * @param value Value for parsing and verification
+ * @returns Successfully parsed object or Failure with description of parsing error
+ */
 export function maybeVerify<O extends Value, I extends Value = Possible<O>>(
   parser: Schema<I, O>
 ): (value?: I) => Result<Intersection<O, I>, string>
@@ -124,6 +135,7 @@ export function maybeVerify<O extends Value, I extends Value = Possible<O>>(pars
 
 /**
  * @param parser Object which describes the way properties has to be parsed or verified
+ * @param value Value for parsing and verification
  * @returns The product of parsing. It might throw an exception if parsing was to successful
  */
 export const verify = <O extends Value, I extends Value = Possible<O>>(parser: Schema<I, O>, value: I) =>

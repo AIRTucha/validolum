@@ -1,18 +1,16 @@
-# JavaScript object parsing and validation
-[![Build Status](https://travis-ci.org/AIRTucha/path2ct.svg?branch=master)](https://travis-ci.org/AIRTucha/validolum)[![Coverage Status](https://coveralls.io/repos/github/AIRTucha/path2ct/badge.svg?branch=master)](https://coveralls.io/github/AIRTucha/validolum?branch=master)
-## Get started 
+import { expect } from 'chai'
+import { Success, Failure, Result } from 'amonad'
+import { maybeVerify, num, str, bool, verify, float, int, obj } from '../src/index'
+import { stringify } from 'querystring'
 
-The package is available via npm. It has to be installed as a local dependency:
+const equal = <T>(v1: T, v2: T) => expect(v1).eql(v2)
 
-    npm install validolum
+// It is not part of test suits.
+// It is just a collection of examples used in documentation.
+// Examples are written in a form of tests to be verify their correctness.
 
-A DSL for parsing and validation of JavaScript objects.
-
-### Examples
-
-WIP
-
-```typescript
+describe("examples", () => {
+  it("Simple validation", () => {
     const verificationResult = verify<{ value: number }>(
       {
         value: num
@@ -21,9 +19,14 @@ WIP
         value: 2
       }
     )
-```
 
-```typescript
+    equal(
+      verificationResult,
+      { value: 2 }
+    )
+  })
+
+  it("Simple parsing", () => {
     const verificationResult = verify<{ value: number }, { value: string }>(
       {
         value: float
@@ -32,9 +35,14 @@ WIP
         value: "3.1415"
       }
     )
-```
 
-```typescript
+    equal(
+      verificationResult,
+      { value: 3.1415 }
+    )
+  })
+
+  it("Monadic API", () => {
     const verificationResult = maybeVerify(
       {
         value: num
@@ -43,18 +51,28 @@ WIP
         value: 2
       }
     )
-```
 
-```typescript
+    equal(
+      verificationResult,
+      Success({ value: 2 })
+    )
+  })
+
+  it("Curred Monadic API", () => {
     const verificationResult = maybeVerify<{ value: number }>(
       {
         value: num
       })({
         value: 2
       })
-```
 
-```typescript
+    equal(
+      verificationResult,
+      Success({ value: 2 })
+    )
+  })
+
+  it("Nested parsing", () => {
     type NestedValue = {
       value: boolean
     }
@@ -69,10 +87,20 @@ WIP
         valueNested: { value: true }
       }
     )
-```
 
-```typescript
-type City = "London" | "Manchester" | "Liverpool" | "Glasgow" | "Belfast"
+    equal(
+      verificationResult,
+      {
+        valueNested: {
+          value: true
+        }
+      }
+    )
+
+  })
+
+  it("Multiple properties parsing", () => {
+    type City = "London" | "Manchester" | "Liverpool" | "Glasgow" | "Belfast"
 
     type Address = {
       street: string,
@@ -117,46 +145,19 @@ type City = "London" | "Manchester" | "Liverpool" | "Glasgow" | "Belfast"
         customField: {},
       }
     )
-```
 
-## API
+    equal(
+      verificationResult,
+      {
+        name: "Sherlock",
+        address: {
+          street: "Baker",
+          houseNumber: 221,
+          city: "London"
+        },
+        customField: {},
+      }
+    )
+  })
 
-WIP
-
-## Contribution guidelines
-
-The project is based on *npm* eco-system. Therefore, development process is organized via *npm* scripts.
-
-For installation of dependencies run
-
-    npm install
-
-To build application once
-
-    npm run build
-
-To build an application and watch for changes of files
-
-    npm run build:w
-
-To run tslint one time for CI
-
-    npm run lint
-
-To unit tests in a watching mode are performed by 
-
-    npm run test
-    
-To execute a test suit single time
-
-    npm run test:once
-
-To execute a test suit single time with coverage report
-
-    npm run test:c
-
-To execute a test suit single time with coverage report submitted to *coveralls*
-
-    npm run test:ci
-
-Everybody is welcome to contribute and submit pull requests. Please communicate your ideas and suggestions via *issues*.
+})
