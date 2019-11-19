@@ -1,6 +1,6 @@
 {
   "name": "validolum",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Utility for parsing of JavaScript objects",
   "main": "./dist/index.js",
   "scripts": {
@@ -71,6 +71,6 @@
     "typescript": "^3.5.1"
   },
   "dependencies": {
-    "amonad": "^0.8.5"
+    "amonad": "^1.0.0"
   }
 }
