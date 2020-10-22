@@ -19,7 +19,7 @@ type Schema<I, O = I> = {
  * The main difference with Partial is the fact that it is also applicable to nested objects.
  */
 type Possible<T> = {
-  [P in keyof T]?: Possible<T[P]>
+  [P in keyof T]?: any
 }
 
 /**
@@ -42,18 +42,26 @@ export const num = (value?: number): Result<number, string> => typeof value === 
  * @param value String potentially containing floating number
  * @returns Success of float or Failure which contains description of the error
  */
-export const float = (value: string): Result<number, string> => {
-  const result = Number.parseFloat(value)
-  return Number.isNaN(result) ? Failure("Value is not float") : Success(result)
+export const float = (value?: string): Result<number, string> => {
+  if (value) {
+    const result = Number.parseFloat(value)
+    return Number.isNaN(result) ? Failure("Value is not float") : Success(result)
+  } else {
+    return Failure("Value is not defined")
+  }
 }
 
 /**
  * @param value String potentially containing integer number
  * @returns Success of integer or Failure which contains description of the error
  */
-export const int = (value: string): Result<number, string> => {
-  const result = Number.parseInt(value)
-  return Number.isNaN(result) ? Failure("Value is not integer") : Success(result)
+export const int = (value?: string): Result<number, string> => {
+  if (value) {
+    const result = Number.parseInt(value)
+    return Number.isNaN(result) ? Failure("Value is not integer") : Success(result)
+  } else {
+    return Failure("Value is not defined")
+  }
 }
 
 /**
