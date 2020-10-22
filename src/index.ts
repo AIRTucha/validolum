@@ -118,7 +118,7 @@ export function maybeVerify<O extends Value, I extends Value = Possible<O>>(pars
           .reduce(
             (obj, key) => {
               obj[key] = parser[key](value[key])
-                .bind(
+                .then(
                   undefined,
                   errMsg => `Key ${key} is not validated due to: ${errMsg}`
                 )
@@ -140,7 +140,7 @@ export function maybeVerify<O extends Value, I extends Value = Possible<O>>(pars
  */
 export const verify = <O extends Value, I extends Value = Possible<O>>(parser: Schema<I, O>, value: I) =>
   maybeVerify(parser, value)
-    .bind(
+    .then(
       undefined,
       errMsg => new Error(errMsg)
     )
