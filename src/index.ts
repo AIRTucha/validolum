@@ -33,7 +33,7 @@ type Intersection<O, I> = {
  * @param value Potential number
  * @returns Success of number or Failure which contains description of the error
  */
-export const num = (value?: number): Result<number, string> => typeof value === "number" ?
+export const num = (value?: number | null): Result<number, string> => typeof value === "number" ?
   Success(value)
   :
   Failure("Value is not number")

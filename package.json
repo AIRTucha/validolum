@@ -1,6 +1,6 @@
 {
   "name": "validolum",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Utility for parsing of JavaScript objects",
   "main": "./dist/src/index.js",
   "scripts": {
