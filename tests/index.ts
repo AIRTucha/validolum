@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { Success, Failure } from 'amonad'
-import { maybeVerify, num, str, bool, verify, float, int } from '../src/index'
+import { maybeVerify, num, str, bool, verify, float, int, or, and } from '../src/index'
 
 const equal = <T>(v1: T, v2: T) => expect(v1).eql(v2)
 
@@ -164,5 +164,95 @@ describe("tryToValidate", () => {
         }
       )
     ).throw(Error, "Key value is not validated due to: Value is not string")
+  })
+})
+
+describe('or', () => {
+  it('string or number, string', () => {
+    equal(
+      maybeVerify<{ value: number | string }>({
+        value: or(num, str)
+      })({
+        value: "ok"
+      }),
+      Success({ value: "ok" })
+    )
+  })
+
+  it('string or number, number', () => {
+    equal(
+      maybeVerify<{ value: number | string }>({
+        value: or(num, str)
+      })({
+        value: 13
+      }),
+      Success({ value: 13 })
+    )
+  })
+
+  it('string or number, object', () => {
+    equal(
+      maybeVerify<{ value: number | string }>({
+        value: or(num, str)
+      })({
+        value: {}
+      }),
+      Failure('Key value is not validated due to: Value is not number and Value is not string')
+    )
+  })
+})
+
+
+describe('and', () => {
+  type Custom1 = {
+    value1: string
+  }
+
+  type Custom2 = {
+    value2: number
+  }
+  const custom1 = maybeVerify<Custom1>({ value1: str })
+  const custom2 = maybeVerify<Custom2>({ value2: num })
+
+  it('object of two types', () => {
+    equal(
+      maybeVerify<{ value: Custom1 & Custom2 }>({
+        value: and(custom1, custom2)
+      })({
+        value: {
+          value1: 'ok',
+          value2: 13
+        }
+      }),
+      Success({ value: { value1: 'ok', value2: 13 } })
+    )
+  })
+
+  it('object fails the first type', () => {
+    equal(
+      maybeVerify<{ value: Custom1 & Custom2 }>({
+        value: and(custom1, custom2)
+      })({
+        value: {
+          value1: 13,
+          value2: 13
+        }
+      }),
+      Failure("Key value is not validated due to: Key value1 is not validated due to: Value is not string")
+    )
+  })
+
+  it('object fails the second type', () => {
+    equal(
+      maybeVerify<{ value: Custom1 & Custom2 }>({
+        value: and(custom1, custom2)
+      })({
+        value: {
+          value1: 'ok',
+          value2: 'ok'
+        }
+      }),
+      Failure("Key value is not validated due to: Key value2 is not validated due to: Value is not number")
+    )
   })
 })

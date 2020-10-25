@@ -98,6 +98,44 @@ export const obj = (value?: object): Result<object, string> => typeof value === 
   Failure("Value is not obj")
 
 /**
+ * @param value Potential undefined
+ * @returns Success of undefined or Failure which contains description of the error
+ */
+export const undef = (value?: any): Result<undefined, string> => value === undefined ?
+  Success(value)
+  :
+  Failure('Value is not undefined')
+
+/**
+ * @param f1 Validate for the first type
+ * @param f2 Validate for the second type
+ * @returns Success of the first or second type or Failure with description of the error
+ */
+export const or = <I1, I2, O1, O2>(f1: (val: I1) => Result<O1, string>, f2: (val: I2) => Result<O2, string>) =>
+  (val: I1 & I2): Result<O1 | O2, string> =>
+    f1(val)
+      .then(
+        undefined,
+        er1 => f2(val)
+          .then(
+            undefined,
+            er2 => `${er1} and ${er2}`
+          )
+      )
+
+/**
+ * @param f1 Validate for the first type
+ * @param f2 Validate for the second type
+ * @returns Success of the first and second type or Failure with description of the error
+ */
+export const and = <I1, I2>(f1: (val: I1) => Result<I1, string>, f2: (val: I2) => Result<I2, string>) =>
+  (val: I1 & I2): Result<I1 & I2, string> =>
+    f1(val)
+      .then(
+        _ => f2(val).then(_ => Success(val))
+      )
+
+/**
  * @param parser Object which describes the way properties has to be parsed or verified
  * @param value Value for parsing and verification
  * @returns Successfully parsed object or Failure with description of parsing error
